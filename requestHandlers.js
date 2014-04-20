@@ -21,6 +21,24 @@ function init(response, postData) {
     response.end();
 }
 
+// Logs in a user and sends all his information
+function login(response, postData) {
+	console.log('Request handler for "login" has been called');
+
+	response.writeHead(200, {"Content-Type": "text/html"});
+	response.write("login");
+	response.end();
+}
+
+// Locates people near from the requester, based on his gps location
+function locate(response, postData) {
+	console.log('Request handler for "locate" has been called');
+
+	response.writeHead(200, {"Content-Type": "text/html"});
+	response.write("locate");
+	response.end();
+}
+
 function upload(response, postData) {
 	console.log('Request handler for "upload" has been called.');
 
@@ -30,4 +48,6 @@ function upload(response, postData) {
 }
 
 exports.init = init;
+exports.login = login;
+exports.locate = locate;
 exports.upload = upload;
