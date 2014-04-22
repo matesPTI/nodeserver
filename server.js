@@ -1,5 +1,6 @@
-var http = require('http');
+var https = require('https');
 var url = require('url');
+var fs = require('fs');
 
 function start(route, handle) {
 
@@ -20,8 +21,14 @@ function start(route, handle) {
 	    });
 	}
 
-	http.createServer(onRequest).listen(8888, '127.0.0.1');
-	console.log('Server running at http://127.0.0.1:8888/');
+	var pk = fs.readFileSync('./ssl/privatekey.pem');
+	var pc = fs.readFileSync('./ssl/certificate.pem');
+	var opts = {
+		key: pk,
+		cert: pc
+	};
+	https.createServer(opts, onRequest).listen(443, '127.0.0.1');
+	console.log('Server running at https://127.0.0.1:443/');
 }
 
 exports.start = start;

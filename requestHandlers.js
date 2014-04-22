@@ -1,5 +1,6 @@
 var exec = require("child_process").exec;
 var querystring = require('querystring');
+var https = require('https');
 
 function init(response, postData) {
 	console.log('Request handler for "init" has been called.');
@@ -9,9 +10,9 @@ function init(response, postData) {
 	    '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />'+
 	    '</head>'+
 	    '<body>'+
-	    '<form action="/upload" method="post">'+
-	    '<textarea name="text" rows="20" cols="60"></textarea>'+
-	    '<input type="submit" value="Submit text" />'+
+	    '<form action="/signup" method="post">'+
+	    '<textarea name="accesToken" placeholder="Acces token..." rows="20" cols="60"></textarea>'+
+	    '<input type="submit" value="Submit token" />'+
 	    '</form>'+
 	    '</body>'+
 	    '</html>';
@@ -19,6 +20,32 @@ function init(response, postData) {
     response.writeHead(200, {"Content-Type": "text/html"});
     response.write(body);
     response.end();
+}
+
+// Signs up a user given his Facebook token
+function signup(response, postData) {
+	console.log('Request handler for "signup" has been called');
+
+	var token = querystring.parse(postData)['accesToken'];
+	var options = {
+		host: 'graph.facebook.com',
+		port: 443,
+		path: '/me?access_token='+ token
+	};
+
+	https.get(options, function(res) {
+		res.setEncoding('utf8');
+		res.on('data', function(chunk) {
+			console.log('Response: ' + chunk);
+		});
+
+	}).on('error', function(e) {
+		console.error('Problem with request: ' + e);
+	});
+
+	response.writeHead(200, {"Content-Type": "text/html"});
+	response.write("signup");
+	response.end();
 }
 
 // Logs in a user and sends all his information
@@ -48,6 +75,7 @@ function upload(response, postData) {
 }
 
 exports.init = init;
+exports.signup = signup;
 exports.login = login;
 exports.locate = locate;
 exports.upload = upload;
