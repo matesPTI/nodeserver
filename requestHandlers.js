@@ -1,6 +1,7 @@
 var exec = require("child_process").exec;
 var querystring = require('querystring');
 var https = require('https');
+var futures = require('futures');
 
 function init(response, postData) {
 	console.log('Request handler for "init" has been called.');
@@ -32,20 +33,29 @@ function signup(response, postData) {
 		port: 443,
 		path: '/me?access_token='+ token
 	};
+	var sequence = futures.sequence();
 
-	https.get(options, function(res) {
-		res.setEncoding('utf8');
-		res.on('data', function(chunk) {
-			console.log('Response: ' + chunk);
+	sequence
+		.then(function(next) {
+			https.get(options, function(res) {
+				res.setEncoding('utf8');
+				var info = '';
+				res.on('data', function(chunk) {
+					info += chunk;
+				});
+				res.on('end', function() {
+					next(info);
+				});
+
+			}).on('error', function(e) {
+				console.error('Problem with request: ' + e);
+			});
+		})
+		.then(function(next, info) {
+			response.writeHead(200, {"Content-Type": "text/html"});
+			response.write(info);
+			response.end();
 		});
-
-	}).on('error', function(e) {
-		console.error('Problem with request: ' + e);
-	});
-
-	response.writeHead(200, {"Content-Type": "text/html"});
-	response.write("signup");
-	response.end();
 }
 
 // Logs in a user and sends all his information
@@ -66,16 +76,7 @@ function locate(response, postData) {
 	response.end();
 }
 
-function upload(response, postData) {
-	console.log('Request handler for "upload" has been called.');
-
-	response.writeHead(200, {"Content-Type": "text/html"});
-  	response.write("POST data recieved: " + querystring.parse(postData)['text']);
-  	response.end();
-}
-
 exports.init = init;
 exports.signup = signup;
 exports.login = login;
 exports.locate = locate;
-exports.upload = upload;

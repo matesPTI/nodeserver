@@ -1,0 +1,11 @@
+{
+	"name": "mates-server",
+	"version": "0.1.0",
+	"repository": {
+		"type": "git",
+		"url": "https://Mumpo@bitbucket.org/Mumpo/mates.git"
+	},
+	"dependencies": {
+		"futures": ">=2.1.0"
+	}
+}
