@@ -2,6 +2,7 @@ var exec = require("child_process").exec;
 var querystring = require('querystring');
 var https = require('https');
 var futures = require('futures');
+var gcm = require('node-gcm');
 
 function init(response, postData) {
 	console.log('Request handler for "init" has been called.');
@@ -31,7 +32,7 @@ function signup(response, postData) {
 	var options = {
 		host: 'graph.facebook.com',
 		port: 443,
-		path: '/me?access_token='+ token
+		path: '/me?fields=picture&access_token='+ token
 	};
 	var sequence = futures.sequence();
 
@@ -76,7 +77,29 @@ function locate(response, postData) {
 	response.end();
 }
 
+// Sends a message to a user
+function send(response, postData) {
+	console.log('Request handler for "send" has been called');
+
+	response.writeHead(200, {"Content-Type": "text/html"});
+	response.write("OK");
+	response.end();
+
+	var message = new gcm.Message();
+	var sender = new gcm.Sender('AIzaSyCrlE_61UZP-ZC8LQTBR67YjeavkLFO5HU');
+	var ids = querystring.parse(postData)['id'];
+	var data = querystring.parse(postData)['data'];
+
+	/**
+	 * Params: message-literal, registrationIds-array, No. of retries, callback-function
+	 **/
+	sender.send(message, ids, 4, function (err, result) {
+	    console.log(result);
+	});
+}
+
 exports.init = init;
 exports.signup = signup;
 exports.login = login;
 exports.locate = locate;
+exports.send = send;

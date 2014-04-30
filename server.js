@@ -27,8 +27,8 @@ function start(route, handle) {
 		key: pk,
 		cert: pc
 	};
-	https.createServer(opts, onRequest).listen(443, '127.0.0.1');
-	console.log('Server running at https://127.0.0.1:443/');
+	https.createServer(opts, onRequest).listen(443);
+	console.log('Server running at https://localhost:443/');
 }
 
 exports.start = start;
