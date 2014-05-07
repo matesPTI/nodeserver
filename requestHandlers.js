@@ -81,21 +81,27 @@ function locate(response, postData) {
 function send(response, postData) {
 	console.log('Request handler for "send" has been called');
 
-	response.writeHead(200, {"Content-Type": "text/html"});
-	response.write("OK");
-	response.end();
-
 	var message = new gcm.Message();
 	var sender = new gcm.Sender('AIzaSyCrlE_61UZP-ZC8LQTBR67YjeavkLFO5HU');
-	var ids = querystring.parse(postData)['id'];
+	var id = querystring.parse(postData)['id'];
 	var data = querystring.parse(postData)['data'];
 
-	/**
-	 * Params: message-literal, registrationIds-array, No. of retries, callback-function
-	 **/
-	sender.send(message, ids, 4, function (err, result) {
-	    console.log(result);
-	});
+	response.writeHead(200, {"Content-Type": "text/html"});
+	if (id == null) {
+		response.write("ERROR: ID MISSING");
+		response.end();
+	}
+	else {
+		response.write("OK");
+		response.end();
+
+		/**
+		 * Params: message-literal, registrationIds-array, No. of retries, callback-function
+		 **/
+		sender.send(message, id, 4, function (err, result) {
+		    console.log(result);
+		});
+		}
 }
 
 exports.init = init;
