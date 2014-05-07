@@ -82,7 +82,7 @@ function send(response, postData) {
 	console.log('Request handler for "send" has been called');
 
 	var message = new gcm.Message();
-	var sender = new gcm.Sender('AIzaSyCrlE_61UZP-ZC8LQTBR67YjeavkLFO5HU');
+	var sender = new gcm.Sender('AIzaSyBVanMtwZZd3-cgqYwPwt9JAfUhWqxmoYE');
 	var id = querystring.parse(postData)['id'];
 	var data = querystring.parse(postData)['data'];
 
