@@ -21,8 +21,8 @@ function start(route, handle) {
 	    });
 	}
 
-	var pk = fs.readFileSync('./ssl/privatekey.pem');
-	var pc = fs.readFileSync('./ssl/certificate.pem');
+	var pk = fs.readFileSync('./ssl/ec2key.pem');
+	var pc = fs.readFileSync('./ssl/ec2cert.pem');
 	var opts = {
 		key: pk,
 		cert: pc
