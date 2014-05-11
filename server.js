@@ -7,13 +7,13 @@ function start(route, handle) {
 	function onRequest(request, response) {
 		var pathname = url.parse(request.url).pathname;
 		var dataPost = "";
-		console.log('Request on ' + pathname + ' recieved.');
+		write_log('Request on ' + pathname + ' recieved.');
 
 		request.setEncoding("utf8");
 
         request.addListener("data", function(chunk) {
           	dataPost += chunk;
-          	console.log("POST chunk recieved: '" + chunk + "'.");
+          	write_log("POST chunk recieved: '" + chunk + "'.");
         });
 
         request.addListener("end", function() {
@@ -28,7 +28,12 @@ function start(route, handle) {
 		cert: pc
 	};
 	https.createServer(opts, onRequest).listen(443);
-	console.log('Server running at https://localhost:443/');
+	write_log('Server running at https://localhost:443/');
+}
+
+function write_log(info) {
+	fs.appendFile("log.txt", new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '') 
+									+ ' : ' + info + '\n', function(err) {});
 }
 
 exports.start = start;

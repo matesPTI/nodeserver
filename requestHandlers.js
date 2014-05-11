@@ -3,9 +3,10 @@ var querystring = require('querystring');
 var https = require('https');
 var futures = require('futures');
 var gcm = require('node-gcm');
+var fs = require('fs');
 
 function init(response, postData) {
-	console.log('Request handler for "init" has been called.');
+	write_log('Request handler for "init" has been called.');
 
 	var body = '<html>'+
 	    '<head>'+
@@ -26,7 +27,7 @@ function init(response, postData) {
 
 // Signs up a user given his Facebook token
 function signup(response, postData) {
-	console.log('Request handler for "signup" has been called');
+	write_log('Request handler for "signup" has been called');
 
 	var token = querystring.parse(postData)['accesToken'];
 	var options = {
@@ -61,7 +62,7 @@ function signup(response, postData) {
 
 // Logs in a user and sends all his information
 function login(response, postData) {
-	console.log('Request handler for "login" has been called');
+	write_log('Request handler for "login" has been called');
 
 	response.writeHead(200, {"Content-Type": "text/html"});
 	response.write("login");
@@ -70,7 +71,7 @@ function login(response, postData) {
 
 // Locates people near from the requester, based on his gps location
 function locate(response, postData) {
-	console.log('Request handler for "locate" has been called');
+	write_log('Request handler for "locate" has been called');
 
 	response.writeHead(200, {"Content-Type": "text/html"});
 	response.write("locate");
@@ -79,7 +80,7 @@ function locate(response, postData) {
 
 // Sends a message to a user
 function send(response, postData) {
-	console.log('Request handler for "send" has been called');
+	write_log('Request handler for "send" has been called');
 
 	var message = new gcm.Message();
 	var sender = new gcm.Sender('AIzaSyBVanMtwZZd3-cgqYwPwt9JAfUhWqxmoYE');
@@ -99,9 +100,14 @@ function send(response, postData) {
 		 * Params: message-literal, registrationIds-array, No. of retries, callback-function
 		 **/
 		sender.send(message, id, 4, function (err, result) {
-		    console.log(result);
+		    write_log(result);
 		});
 		}
+}
+
+function write_log(info) {
+	fs.appendFile("log.txt", new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '') 
+									+ ' : ' + info + '\n', function(err) {});
 }
 
 exports.init = init;
