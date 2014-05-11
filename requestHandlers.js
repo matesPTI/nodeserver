@@ -82,7 +82,6 @@ function locate(response, postData) {
 function send(response, postData) {
 	write_log('Request handler for "send" has been called');
 
-	var message = new gcm.Message();
 	var sender = new gcm.Sender('AIzaSyBVanMtwZZd3-cgqYwPwt9JAfUhWqxmoYE');
 	var id = querystring.parse(postData)['id'];
 	var data = querystring.parse(postData)['data'];
@@ -96,14 +95,21 @@ function send(response, postData) {
 		response.write("OK");
 		response.end();
 
+		var message = new gcm.Message({
+		    /*collapseKey: 'demo',*/
+		    delayWhileIdle: true,
+		    timeToLive: 3,
+		    data: {
+		        data: data
+		    }
+		});
 		var ids = [];
 		ids.push(id);
-		message.addData('data', data);
 		/**
 		 * Params: message-literal, registrationIds-array, No. of retries, callback-function
 		 **/
 		sender.send(message, ids, 4, function (err, result) {
-		    write_log(err);
+		    write_log('GCM error: err');
 		});
 		}
 }
