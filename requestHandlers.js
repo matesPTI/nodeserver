@@ -100,7 +100,7 @@ function send(response, postData) {
 		 * Params: message-literal, registrationIds-array, No. of retries, callback-function
 		 **/
 		sender.send(message, id, 4, function (err, result) {
-		    write_log(result);
+		    write_log(err);
 		});
 		}
 }
