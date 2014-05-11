@@ -98,6 +98,7 @@ function send(response, postData) {
 
 		var ids = [];
 		ids.push(id);
+		message.addData('data', data);
 		/**
 		 * Params: message-literal, registrationIds-array, No. of retries, callback-function
 		 **/
