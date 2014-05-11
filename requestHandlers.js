@@ -96,10 +96,12 @@ function send(response, postData) {
 		response.write("OK");
 		response.end();
 
+		var ids = [];
+		ids.push(id);
 		/**
 		 * Params: message-literal, registrationIds-array, No. of retries, callback-function
 		 **/
-		sender.send(message, id, 4, function (err, result) {
+		sender.send(message, ids, 4, function (err, result) {
 		    write_log(err);
 		});
 		}
