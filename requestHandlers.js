@@ -82,8 +82,7 @@ function locate(response, postData) {
 function send(response, postData) {
 	write_log('Request handler for "send" has been called');
 
-	/*var sender = new gcm.Sender('AIzaSyBVanMtwZZd3-cgqYwPwt9JAfUhWqxmoYE');*/
-	var sender = new gcm.Sender('874158170358');
+	var sender = new gcm.Sender('AIzaSyBVanMtwZZd3-cgqYwPwt9JAfUhWqxmoYE');
 	var id = querystring.parse(postData)['id'];
 	var data = querystring.parse(postData)['data'];
 
