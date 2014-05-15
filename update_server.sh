@@ -1,5 +1,6 @@
-#!bin/bash
+#!/bin/bash
 
-sudo kill -KILL 'ps -e | grep "node"'
+PID='ps -e | grep "node" | cut -f 2 -d " "'
+sudo kill -KILL PID 
 git pull origin master
 sudo node index.js
