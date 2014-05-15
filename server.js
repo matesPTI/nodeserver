@@ -1,6 +1,7 @@
 var https = require('https');
 var url = require('url');
 var fs = require('fs');
+var Constants = require('./Constants');
 
 function start(route, handle) {
 
@@ -27,7 +28,7 @@ function start(route, handle) {
 		key: pk,
 		cert: pc
 	};
-	https.createServer(opts, onRequest).listen(443);
+	https.createServer(opts, onRequest).listen(Constants.SERVER_PORT);
 	write_log('Server running at https://localhost:443/');
 }
 
