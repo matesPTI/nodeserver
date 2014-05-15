@@ -109,6 +109,7 @@ function send(response, postData) {
 		 **/
 		sender.send(message, ids, 4, function (err, result) {
 		    write_log('GCM error: ' + err);
+		    write_log('GCM error: ' + result);
 		});
 		}
 }
