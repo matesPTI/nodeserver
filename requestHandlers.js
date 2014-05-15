@@ -109,7 +109,7 @@ function send(response, postData) {
 		 * Params: message-literal, registrationIds-array, No. of retries, callback-function
 		 **/
 		sender.send(message, ids, 4, function (err, result) {
-		    write_log('GCM error: err');
+		    write_log('GCM error: ' + err);
 		});
 		}
 }
