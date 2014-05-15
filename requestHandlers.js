@@ -98,7 +98,6 @@ function send(response, postData) {
 		var message = new gcm.Message({
 		    /*collapseKey: 'demo',*/
 		    delayWhileIdle: true,
-		    timeToLive: 3,
 		    data: {
 		        data: data
 		    }
