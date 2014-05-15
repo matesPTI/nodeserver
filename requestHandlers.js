@@ -87,7 +87,7 @@ function send(response, postData) {
 	var data = querystring.parse(postData)['data'];
 
 	response.writeHead(200, {"Content-Type": "text/html"});
-	if (id == null) {
+	if (id == null || id == "") {
 		response.write("ERROR: ID MISSING");
 		response.end();
 	}
