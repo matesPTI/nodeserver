@@ -1,12 +1,15 @@
 var exec = require("child_process").exec;
 var querystring = require('querystring');
+var http = require('http');
 var https = require('https');
 var futures = require('futures');
 var gcm = require('node-gcm');
-var fs = require('fs');
+var couchrequest = require('./couchrequest');
+var utils = require('./utils');
+var constants = require('./constants');
 
 function init(response, postData) {
-	write_log('Request handler for "init" has been called.');
+	utils.write_log('Request handler for "init" has been called.');
 
 	var body = '<html>'+
 	    '<head>'+
@@ -27,13 +30,13 @@ function init(response, postData) {
 
 // Signs up a user given his Facebook token
 function signup(response, postData) {
-	write_log('Request handler for "signup" has been called');
+	utils.write_log('Request handler for "signup" has been called');
 
 	var token = querystring.parse(postData)['accesToken'];
 	var options = {
 		host: 'graph.facebook.com',
 		port: 443,
-		path: '/me?fields=picture&access_token='+ token
+		path: '/me?fields=id,name,birthday&access_token='+ token
 	};
 	var sequence = futures.sequence();
 
@@ -54,15 +57,18 @@ function signup(response, postData) {
 			});
 		})
 		.then(function(next, info) {
-			response.writeHead(200, {"Content-Type": "text/html"});
-			response.write(info);
-			response.end();
+			var JSONinfo = JSON.parse(info);
+			couchrequest.put(JSONinfo.id, JSONinfo, function(couchRes) {
+				response.writeHead(200, {"Content-Type": "application/json"});
+				response.write(couchRes);
+				response.end();
+			});
 		});
 }
 
 // Logs in a user and sends all his information
 function login(response, postData) {
-	write_log('Request handler for "login" has been called');
+	utils.write_log('Request handler for "login" has been called');
 
 	response.writeHead(200, {"Content-Type": "text/html"});
 	response.write("login");
@@ -71,29 +77,70 @@ function login(response, postData) {
 
 // Locates people near from the requester, based on his gps location
 function locate(response, postData) {
-	write_log('Request handler for "locate" has been called');
+	utils.write_log('Request handler for "locate" has been called');
+
+	var id = querystring.parse(postData)['id'];
+	if (id == null || id == "") {
+		response.write(constants.ERROR_MATES_ID_MISSING);
+		response.end();
+	}
+	else {
+		couchrequest.get(id, function(couchRes) {
+			response.writeHead(200, {"Content-Type": "application/json"});
+			response.write(info);
+			response.end();
+		});
+	}
+}
+
+function register(response, postData) {
+	utils.write_log('Request handler for "register" has been called');
+
+	var matesid = querystring.parse(postData)['matesid'];
+	var gcmid = querystring.parse(postData)['gcmid'];
 
 	response.writeHead(200, {"Content-Type": "text/html"});
-	response.write("locate");
-	response.end();
+	if (matesid == null || matesid == "") {
+		response.write(constants.ERROR_MATES_ID_MISSING);
+		response.end();
+	}
+	else if (gcmid == null || gcmid == "") {
+		response.write(constants.ERROR_GCM_ID_MISSING);
+		response.end();
+	}
+	else {
+		couchrequest.get(matesid, function(couchGetRes) {
+			JSONinfo = JSON.parse(couchGetRes);
+			JSONinfo.gcmid = gcmid;
+
+			couchrequest.put(matesid, JSONinfo, function(coughPutRes) {
+				response.writeHead(200, {"Content-Type": "application/json"});
+				response.write(coughPutRes);
+				response.end();
+			});
+		});
+	}
 }
 
 // Sends a message to a user
 function send(response, postData) {
-	write_log('Request handler for "send" has been called');
+	utils.write_log('Request handler for "send" has been called');
 
 	var sender = new gcm.Sender('AIzaSyCRYkW6OoS8NrURzI-MsU3SkrsfDhPrmRs');
-	var id = querystring.parse(postData)['id'];
+	var senderid = querystring.parse(postData)['sender'];
+	var receiverid = querystring.parse(postData)['receiver'];
 	var data = querystring.parse(postData)['data'];
 
 	response.writeHead(200, {"Content-Type": "text/html"});
-	if (id == null || id == "") {
-		response.write("ERROR: ID MISSING");
+	if (senderid == null || senderid == "") {
+		response.write(constants.ERROR_MATES_ID_MISSING);
+		response.end();
+	}
+	if (receiverid == null || receiverid == "") {
+		response.write(constants.ERROR_MATES_ID_MISSING);
 		response.end();
 	}
 	else {
-		response.write("OK");
-		response.end();
 
 		var message = new gcm.Message({
 		    /*collapseKey: 'demo',*/
@@ -102,25 +149,34 @@ function send(response, postData) {
 		        data: data
 		    }
 		});
+
 		var ids = [];
-		ids.push(id);
-		/**
-		 * Params: message-literal, registrationIds-array, No. of retries, callback-function
-		 **/
-		sender.send(message, ids, 4, function (err, result) {
-		    write_log('GCM error: ' + err);
-		    write_log('GCM result: ' + result);
+		couchrequest.get(receiverid, function(couchRes) {
+			var gcmid = JSON.parse(couchRes).gcmid;
+			if (gcmid == null || gcmid == "") {
+				response.write(constants.ERROR_UNREGISTERED_USER);
+				response.end();
+			}
+			else {
+				response.write("OK");
+				response.end();
+				ids.push(gcmid);
+
+				/**
+				 * Params: message-literal, registrationIds-array, No. of retries, callback-function
+				 **/
+				sender.send(message, ids, 4, function (err, result) {
+				    utils.write_log('GCM error: ' + err);
+				    utils.write_log('GCM result: ' + result);
+				});
+			}
 		});
 		}
-}
-
-function write_log(info) {
-	fs.appendFile("log.txt", new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '') 
-									+ ' : ' + info + '\n', function(err) {});
 }
 
 exports.init = init;
 exports.signup = signup;
 exports.login = login;
+exports.register = register;
 exports.locate = locate;
 exports.send = send;

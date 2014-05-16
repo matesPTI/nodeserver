@@ -1,8 +1,20 @@
-var Constants = {
+var constants = {
 
 	'SERVER_PORT' : 443,
 
-	'GCM_SERVER_KEY' : 'AIzaSyCRYkW6OoS8NrURzI-MsU3SkrsfDhPrmRs'
+	'COUCH_SERVER_IP' : '54.76.3.85',
+
+	'COUCH_SERVER_PORT' : 5984,
+
+	'COUCH_USERS_PATH' : '/dades/',
+
+	'GCM_SERVER_KEY' : 'AIzaSyCRYkW6OoS8NrURzI-MsU3SkrsfDhPrmRs',
+
+	'ERROR_MATES_ID_MISSING' : 'Error: matesid field missing.\n',
+
+	'ERROR_GCM_ID_MISSING' : 'Error: gmcid field missing.\n',
+
+	'ERROR_UNREGISTERED_USER' : 'Error: this user is not registered.\n'
 };
 
-exports.Constants = Constants;
+module.exports = constants;
