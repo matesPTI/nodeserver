@@ -73,7 +73,7 @@ function elasticQuery(lat, lon, dist, gender, interest, values) {
 			"filtered" : {
 		    	"query" : {
 		        	"bool" : {
-		        		"must" : {},
+		        		"should" : [],
 		        		"must_not" : [
 		        			{
 		        				"ids" : {
@@ -96,20 +96,34 @@ function elasticQuery(lat, lon, dist, gender, interest, values) {
 		}
 	};
 	if (interest == "both") {
-		console.log("BOTHHHH\n");
-		JSONobject.query.filtered.query.bool.must = {
-			"term" : { 
-		    	"interested_in" : gender
+		JSONobject.query.filtered.query.bool.should = [
+			{ 
+				"term" : { 
+		    		"interested_in" : gender
+		    	}
+		    },
+		    { 
+				"term" : { 
+		    		"interested_in" : "both"
+		    	}
 		    }
-		}
+		]
 	}
 	else {
-		JSONobject.query.filtered.query.bool.must = {
-			"terms" : { 
-				"gender" : interest ,
-		        "interested_in" : gender
+		JSONobject.query.filtered.query.bool.should = [
+			{
+				"terms" : { 
+					"gender" : interest ,
+		        	"interested_in" : gender
+		    	}
+		    },
+		    {
+				"terms" : { 
+					"gender" : interest ,
+		        	"interested_in" : "both"
+		    	}
 		    }
-		}
+		]
 	}
 	return JSONobject;
 }
