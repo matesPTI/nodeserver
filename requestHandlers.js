@@ -257,7 +257,8 @@ function mate(response, postData) {
 							response.end();
 						}
 						else {
-							ids.push(gcmid);
+							ids.push(gcmid1);
+							ids.push(gcmid2);
 							sender.send(message, ids, 4, function (err, result) {
 							    utils.write_log('GCM error: ' + err);
 							    utils.write_log('GCM result: ' + result);
