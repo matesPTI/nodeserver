@@ -265,7 +265,6 @@ function mate(response, postData) {
 			if (mate == 0) JSONme.no.push(receiverid);
 			else {
 				JSONme.yes.push(receiverid);
-
 				couchrequest.exists(receiverid,
 					function(rerr) {
 						response.writeHead(400, {"Content-Type": "text/html"});
@@ -312,13 +311,13 @@ function mate(response, postData) {
 							}
 						}
 				});
-				couchrequest.put(senderid, JSONme, function(a){});
-
-				response.writeHead(200, {"Content-Type": "text/html"});
-				response.write("OK");
-				response.end();
-				utils.write_log('Response: ' + "OK");
 			}
+			couchrequest.put(senderid, JSONme, function(a){});
+
+			response.writeHead(200, {"Content-Type": "text/html"});
+			response.write("OK");
+			response.end();
+			utils.write_log('Response: ' + "OK");
 	});
 }
 
