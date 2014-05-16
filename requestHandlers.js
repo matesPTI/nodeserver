@@ -36,6 +36,7 @@ function signup(response, postData) {
 	if (token == null || token == "") {
 		response.write(constants.ERROR_FB_TOKEN_MISSING);
 		response.end();
+		utils.write_log('Response: ' + constants.ERROR_FB_TOKEN_MISSING);
 		return;
 	}
 
@@ -76,6 +77,7 @@ function signup(response, postData) {
 								response.writeHead(200, {"Content-Type": "application/json"});
 								response.write(couchRes);
 								response.end();
+								utils.write_log('Response: ' + couchRes);
 							});
 						});
 					})
@@ -84,6 +86,7 @@ function signup(response, postData) {
 					response.writeHead(200, {"Content-Type": "application/json"});
 					response.write(JSON.stringify(couchRes));
 					response.end();
+					utils.write_log('Response: ' + JSON.stringify(couchRes));
 			});
 		});
 
@@ -100,6 +103,7 @@ function user(response, postData) {
 	if (id == null || id == "") {
 		response.write(constants.ERROR_MATES_ID_MISSING);
 		response.end();
+		utils.write_log('Response: ' + constants.ERROR_MATES_ID_MISSING);
 		return;
 	}
 	couchrequest.exists(id, 
@@ -107,11 +111,13 @@ function user(response, postData) {
 			response.writeHead(404, {"Content-Type": "text/html"});
 			response.write(err + "\n");
 			response.end();
+			utils.write_log('Response: ' + err);
 		},
 		function(JSONres) {
 			response.writeHead(200, {"Content-Type": "application/json"});
 			response.write(JSON.stringify(JSONres));
 			response.end();
+			utils.write_log('Response: ' + JSON.stringify(JSONres));
 	});
 }
 
@@ -128,18 +134,21 @@ function locate(response, postData) {
 		response.writeHead(404, {"Content-Type": "text/html"});
 		response.write(constants.ERROR_MATES_ID_MISSING);
 		response.end();
+		utils.write_log('Response: ' + constants.ERROR_MATES_ID_MISSING);
 		return;
 	}
 	if (lat == null || lat == "") {
 		response.writeHead(404, {"Content-Type": "text/html"});
 		response.write(constants.ERROR_GPS_POSITION_MISSING);
 		response.end();
+		utils.write_log('Response: ' + constants.ERROR_GPS_POSITION_MISSING);
 		return;
 	}
 	if (lon == null || lon == "") {
 		response.writeHead(404, {"Content-Type": "text/html"});
 		response.write(constants.ERROR_GPS_POSITION_MISSING);
 		response.end();
+		utils.write_log('Response: ' + constants.ERROR_GPS_POSITION_MISSING);
 		return;
 	}
 
@@ -148,6 +157,7 @@ function locate(response, postData) {
 			response.writeHead(404, {"Content-Type": "text/html"});
 			response.write(constants.ERROR_USER_NOT_FOUND);
 			response.end();
+			utils.write_log('Response: ' + constants.ERROR_USER_NOT_FOUND);
 		},
 		function(JSONinfo) {
 			JSONinfo.location.lat = lat;
@@ -160,6 +170,7 @@ function locate(response, postData) {
 					response.writeHead(400, {"Content-Type": "text/html"});
 					response.write(constants.ERROR_ELASTIC_FAILURE);
 					response.end();
+					utils.write_log('Response: ' + constants.ERROR_ELASTIC_FAILURE);
 				}
 				else {
 					response.writeHead(200, {"Content-Type": "application/json"});
@@ -173,6 +184,7 @@ function locate(response, postData) {
 					}
 					response.write(JSON.stringify(JSONresult));
 					response.end();
+					utils.write_log('Response: ' + JSON.stringify(JSONresult));
 				}
 			});
 
@@ -190,10 +202,12 @@ function register(response, postData) {
 	if (matesid == null || matesid == "") {
 		response.write(constants.ERROR_MATES_ID_MISSING);
 		response.end();
+		utils.write_log('Response: ' + constants.ERROR_MATES_ID_MISSING);
 	}
 	else if (gcmid == null || gcmid == "") {
 		response.write(constants.ERROR_GCM_ID_MISSING);
 		response.end();
+		utils.write_log('Response: ' + constants.ERROR_GCM_ID_MISSING);
 	}
 	else {
 		couchrequest.get(matesid, function(couchGetRes) {
@@ -204,6 +218,7 @@ function register(response, postData) {
 				response.writeHead(200, {"Content-Type": "application/json"});
 				response.write(coughPutRes);
 				response.end();
+				utils.write_log('Response: ' + coughPutRes);
 			});
 		});
 	}
@@ -221,18 +236,21 @@ function mate(response, postData) {
 		response.writeHead(400, {"Content-Type": "text/html"});
 		response.write(constants.ERROR_MATES_ID_MISSING);
 		response.end();
+		utils.write_log('Response: ' + constants.ERROR_MATES_ID_MISSING);
 		return;
 	}
 	if (receiverid == null || receiverid == "") {
 		response.writeHead(400, {"Content-Type": "text/html"});
 		response.write(constants.ERROR_MATES_ID_MISSING);
 		response.end();
+		utils.write_log('Response: ' + constants.ERROR_MATES_ID_MISSING);
 		return;
 	}
 	if (mate == null || mate == "") {
 		response.writeHead(400, {"Content-Type": "text/html"});
 		response.write(constants.ERROR_MATE_VALUE_MISSING);
 		response.end();
+		utils.write_log('Response: ' + constants.ERROR_MATE_VALUE_MISSING);
 		return;
 	}
 
@@ -241,6 +259,7 @@ function mate(response, postData) {
 			response.writeHead(400, {"Content-Type": "text/html"});
 			response.write(constants.ERROR_USER_NOT_FOUND);
 			response.end();
+			utils.write_log('Response: ' + constants.ERROR_USER_NOT_FOUND);
 		}, 
 		function(JSONme) {
 			if (mate == 0) JSONme.no.push(receiverid);
@@ -252,6 +271,7 @@ function mate(response, postData) {
 						response.writeHead(400, {"Content-Type": "text/html"});
 						response.write(constants.ERROR_USER_NOT_FOUND);
 						response.end();
+						utils.write_log('Response: ' + constants.ERROR_USER_NOT_FOUND);
 					},
 					function(JSONother) {
 						var wishlist = JSONother.yes;
@@ -275,10 +295,12 @@ function mate(response, postData) {
 							if (gcmid1 == null || gcmid1 == "") {
 								response.write(constants.ERROR_UNREGISTERED_USER);
 								response.end();
+								utils.write_log('Response: ' + constants.ERROR_UNREGISTERED_USER);
 							}
 							if (gcmid2 == null || gcmid2 == "") {
 								response.write(constants.ERROR_UNREGISTERED_USER);
 								response.end();
+								utils.write_log('Response: ' + constants.ERROR_UNREGISTERED_USER);
 							}
 							else {
 								ids.push(gcmid1);
@@ -295,6 +317,7 @@ function mate(response, postData) {
 				response.writeHead(200, {"Content-Type": "text/html"});
 				response.write("OK");
 				response.end();
+				utils.write_log('Response: ' + "OK");
 			}
 	});
 }
@@ -312,11 +335,13 @@ function send(response, postData) {
 	if (senderid == null || senderid == "") {
 		response.write(constants.ERROR_MATES_ID_MISSING);
 		response.end();
+		utils.write_log('Response: ' + constants.ERROR_MATES_ID_MISSING);
 		return;
 	}
 	if (receiverid == null || receiverid == "") {
 		response.write(constants.ERROR_MATES_ID_MISSING);
 		response.end();
+		utils.write_log('Response: ' + constants.ERROR_MATES_ID_MISSING);
 		return;
 	}
 	var message = new gcm.Message({
@@ -335,6 +360,7 @@ function send(response, postData) {
 		if (gcmid == null || gcmid == "") {
 			response.write(constants.ERROR_UNREGISTERED_USER);
 			response.end();
+			utils.write_log('Response: ' + constants.ERROR_UNREGISTERED_USER);
 		}
 		else {
 			response.write("OK");
@@ -363,12 +389,14 @@ function upload(response, postData) {
 		response.writeHead(404, {"Content-Type": "text/html"});
 		response.write(constants.ERROR_MATES_ID_MISSING);
 		response.end();
+		utils.write_log('Response: ' + constants.ERROR_MATES_ID_MISSING);
 		return;
 	}
 	if (img == null || img == "") {
 		response.writeHead(404, {"Content-Type": "text/html"});
 		response.write(constants.ERROR_IMAGE_MISSING);
 		response.end();
+		utils.write_log('Response: ' + constants.ERROR_IMAGE_MISSING);
 		return;
 	}
 
