@@ -235,6 +235,34 @@ function mate(response, postData) {
 						JSONme.mates.push(receiverid);
 						JSONother.mates.push(senderid);
 						couchrequest.put(receiverid, JSONother, function(a){}); 
+
+						var sender = new gcm.Sender(constants.GCM_SERVER_KEY);
+						var message = new gcm.Message({
+						    delayWhileIdle: true,
+						    data: {
+						    	type: "mate",
+						        data: JSON.stringify(JSONme)
+						    }
+						});
+
+						var ids = [];
+						var gcmid1 = JSONme.gcmid;
+						var gcmid2 = JSONother.gcmid;
+						if (gcmid1 == null || gcmid1 == "") {
+							response.write(constants.ERROR_UNREGISTERED_USER);
+							response.end();
+						}
+						if (gcmid2 == null || gcmid2 == "") {
+							response.write(constants.ERROR_UNREGISTERED_USER);
+							response.end();
+						}
+						else {
+							ids.push(gcmid);
+							sender.send(message, ids, 4, function (err, result) {
+							    utils.write_log('GCM error: ' + err);
+							    utils.write_log('GCM result: ' + result);
+							});
+						}
 					}
 					couchrequest.put(senderid, JSONme, function(a){});
 
