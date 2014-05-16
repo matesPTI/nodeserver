@@ -74,13 +74,13 @@ function signup(response, postData) {
 								lon: null
 							};
 							JSONinfo.interested_in = "both";
+							
+							response.writeHead(200, {"Content-Type": "application/json"});
+							response.write(JSON.stringify(JSONinfo));
+							response.end();
+							utils.write_log('Response: ' + JSON.strinfigy(JSONinfo));
 
-							couchrequest.put(JSONinfo.id, JSONinfo, function(couchRes) {
-								response.writeHead(200, {"Content-Type": "application/json"});
-								response.write(couchRes);
-								response.end();
-								utils.write_log('Response: ' + couchRes);
-							});
+							couchrequest.put(JSONinfo.id, JSONinfo, function(a) {});
 						});
 					})
 				},
@@ -381,6 +381,7 @@ function send(response, postData) {
 	});
 }
 
+
 // Sends new info from the user
 function upload(response, postData) {
 	utils.write_log('Request handler for "upload" has been called');
@@ -408,6 +409,35 @@ function upload(response, postData) {
 	response.end();
 }
 
+
+// Erases a user
+function erase(response, postData) {
+	utils.write_log('Request handler for "erase" has been called');
+
+	var id = querystring.parse(postData)['id'];
+	if (id == null || id == "") {
+		response.writeHead(404, {"Content-Type": "text/html"});
+		response.write(constants.ERROR_MATES_ID_MISSING);
+		response.end();
+		utils.write_log('Response: ' + constants.ERROR_MATES_ID_MISSING);
+		return;
+	}
+
+	couchrequest.erase(id,
+		function (err){
+			response.writeHead(404, {"Content-Type": "text/html"});
+			response.write(constants.ERROR_USER_NOT_FOUND);
+			response.end();
+			utils.write_log('Response: ' + constants.ERROR_USER_NOT_FOUND);
+		},
+		function (JSONinfo) {
+			response.writeHead(200, {"Content-Type": "application/json"});
+			response.write(JSON.stringify(JSONinfo));
+			response.end();
+			utils.write_log('Response: ' + JSON.stringify(JSONinfo));
+	});
+}
+
 exports.init = init;
 exports.signup = signup;
 exports.user = user;
@@ -416,3 +446,4 @@ exports.locate = locate;
 exports.mate = mate;
 exports.send = send;
 exports.upload = upload;
+exports.erase = erase;

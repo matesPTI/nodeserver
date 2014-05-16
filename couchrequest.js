@@ -62,6 +62,37 @@ function exists(id, onFalse, onTrue) {
 	});
 }
 
+function erase(id, onFalse, onTrue){
+	exists(id, 
+		function(err) {
+			onFalse(err);
+		}, 
+		function(JSONinfo) {
+			var options = {
+				host: constants.COUCH_SERVER_IP,
+				port: constants.COUCH_SERVER_PORT,
+				path: constants.COUCH_USERS_PATH + id + "\?rev\=" + JSONinfo._rev,
+				method: 'DELETE'
+			};
+			var couchReq = http.request(options, function(res) {
+				res.setEncoding('utf8');
+				var couchRes = '';
+				res.on('data', function(chunk) {
+					couchRes += chunk;
+				});
+				res.on('end', function() {
+					JSONinfo = JSON.parse(couchRes);
+					onTrue(couchRes);
+				});
+
+			}).on('error', function(e) {
+				utils.write_log('Problem with request: ' + e);
+			});
+			
+			couchReq.end();
+	});
+}
+
 /**
  * lat, lon format: 0.0
  * dist format: "20km"
@@ -156,5 +187,6 @@ function elasticGet(query, callback) {
 exports.get = get;
 exports.put = put;
 exports.exists = exists;
+exports.erase = erase;
 exports.elasticQuery = elasticQuery;
 exports.elasticGet = elasticGet;
