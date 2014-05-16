@@ -42,7 +42,7 @@ function signup(response, postData) {
 	var options = {
 		host: 'graph.facebook.com',
 		port: 443,
-		path: '/me?fields=id,name,birthday,likes&access_token='+ token
+		path: '/me?fields=id,name,birthday&access_token='+ token
 	};
 	https.get(options, function(res) {
 		res.setEncoding('utf8');
@@ -55,7 +55,7 @@ function signup(response, postData) {
 
 			couchrequest.exists(JSONinfo.id,
 				function(err) {
-					options.path = '/me/picture?redirect=0&width=300&height=300&access_token=' + token;
+					options.path = '/me/picture?redirect=0&width=320&height=320&access_token=' + token;
 					https.get(options, function(imgres) {
 						imgres.setEncoding('utf8');
 						var imginfo = '';
