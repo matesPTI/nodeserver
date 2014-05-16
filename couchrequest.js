@@ -66,12 +66,20 @@ function exists(id, onFalse, onTrue) {
  * lat, lon format: 0.0
  * dist format: "20km"
  */
-function elasticQuery(lat, lon, dist) {
+function elasticQuery(lat, lon, dist, values) {
 	var JSONobject = {
 		"query": {
 			"filtered" : {
 		    	"query" : {
-		        	"match_all" : {}
+		        	"bool" : {
+		        		"must_not" : [
+		        			{
+		        				"ids" : {
+		        					"values" : values
+		        				}
+		        			}
+		        		]
+		        	}
 		    	},
 		    	"filter" : {
 		        	"geo_distance" : {

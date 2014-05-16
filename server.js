@@ -9,7 +9,7 @@ function start(route, handle) {
 		var pathname = url.parse(request.url).pathname;
 		var dataPost = "";
 		var host = request.connection.remoteAddress;
-		utils.write_log('Request by ' + host + ' on ' + pathname + ' recieved.');
+		utils.write_log('Request from ' + host + ' on ' + pathname + ' recieved.');
 
 		request.setEncoding("utf8");
 

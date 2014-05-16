@@ -120,40 +120,51 @@ function locate(response, postData) {
 	var lat = querystring.parse(postData)['lat'];
 	var lon = querystring.parse(postData)['lon'];
 
-	response.writeHead(200, {"Content-Type": "text/html"});
 	if (id == null || id == "") {
+		response.writeHead(404, {"Content-Type": "text/html"});
 		response.write(constants.ERROR_MATES_ID_MISSING);
 		response.end();
 		return;
 	}
 	if (lat == null || lat == "") {
+		response.writeHead(404, {"Content-Type": "text/html"});
 		response.write(constants.ERROR_GPS_POSITION_MISSING);
 		response.end();
 		return;
 	}
 	if (lon == null || lon == "") {
+		response.writeHead(404, {"Content-Type": "text/html"});
 		response.write(constants.ERROR_GPS_POSITION_MISSING);
 		response.end();
 		return;
 	}
 
-	couchrequest.get(id, function(couchRes) {
-		var JSONinfo = JSON.parse(couchRes);
-		var elasticQuery = couchrequest.elasticQuery(lat, lon, JSONinfo.distance);
+	couchrequest.exists(id,
+		function(err) {
+			response.writeHead(404, {"Content-Type": "text/html"});
+			response.write(constants.ERROR_USER_NOT_FOUND);
+			response.end();
+		},
+		function(JSONinfo) {
+			JSONinfo.lat = lat;
+			JSONinfo.lon = lon;
+			var elasticQuery = couchrequest.elasticQuery(lat, lon, JSONinfo.distance, JSONinfo.yes.concat(JSONinfo.no));
 
-		couchrequest.elasticGet(elasticQuery, function(elasticRes) {
-			var JSONres = JSON.parse(elasticRes);
-			if (JSONres.error != null && JSONres.error != "") {
-				response.writeHead(400, {"Content-Type": "text/html"});
-				response.write(constants.ERROR_ELASTIC_FAILURE);
-				response.end();
-			}
-			else {
-				response.writeHead(200, {"Content-Type": "application/json"});
-				response.write(JSON.stringify(JSONres.hits.hits));
-				response.end();
-			}
-		});
+			couchrequest.elasticGet(elasticQuery, function(elasticRes) {
+				var JSONres = JSON.parse(elasticRes);
+				if (JSONres.error != null && JSONres.error != "") {
+					response.writeHead(400, {"Content-Type": "text/html"});
+					response.write(constants.ERROR_ELASTIC_FAILURE);
+					response.end();
+				}
+				else {
+					response.writeHead(200, {"Content-Type": "application/json"});
+					response.write(JSON.stringify(JSONres.hits.hits));
+					response.end();
+				}
+			});
+
+			couchrequest.put(id, JSONinfo, function(a){});
 	});
 }
 
