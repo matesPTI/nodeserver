@@ -17,7 +17,7 @@ function init(response, postData) {
 	    '</head>'+
 	    '<body>'+
 	    '<form action="/signup" method="post">'+
-	    '<textarea name="accesToken" placeholder="Acces token..." rows="20" cols="60"></textarea>'+
+	    '<textarea name="accessToken" placeholder="Acces token..." rows="20" cols="60"></textarea>'+
 	    '<input type="submit" value="Submit token" />'+
 	    '</form>'+
 	    '</body>'+
@@ -32,47 +32,71 @@ function init(response, postData) {
 function signup(response, postData) {
 	utils.write_log('Request handler for "signup" has been called');
 
-	var token = querystring.parse(postData)['accesToken'];
+	var token = querystring.parse(postData)['accessToken'];
+	if (token == null || token == "") {
+		response.write(constants.ERROR_FB_TOKEN_MISSING);
+		response.end();
+		return;
+	}
+
 	var options = {
 		host: 'graph.facebook.com',
 		port: 443,
-		path: '/me?fields=id,name,birthday&access_token='+ token
+		path: '/me?fields=id,name,birthday,likes&access_token='+ token
 	};
-	var sequence = futures.sequence();
-
-	sequence
-		.then(function(next) {
-			https.get(options, function(res) {
-				res.setEncoding('utf8');
-				var info = '';
-				res.on('data', function(chunk) {
-					info += chunk;
-				});
-				res.on('end', function() {
-					next(info);
-				});
-
-			}).on('error', function(e) {
-				console.error('Problem with request: ' + e);
-			});
-		})
-		.then(function(next, info) {
-			var JSONinfo = JSON.parse(info);
-			couchrequest.put(JSONinfo.id, JSONinfo, function(couchRes) {
-				response.writeHead(200, {"Content-Type": "application/json"});
-				response.write(couchRes);
-				response.end();
-			});
+	https.get(options, function(res) {
+		res.setEncoding('utf8');
+		var info = '';
+		res.on('data', function(chunk) {
+			info += chunk;
 		});
+		res.on('end', function() {
+			var JSONinfo = JSON.parse(info);
+
+			options.path = '/me/picture?redirect=0&width=300&height=300&access_token=' + token;
+			https.get(options, function(imgres) {
+				imgres.setEncoding('utf8');
+				var imginfo = '';
+				imgres.on('data', function(chunk) {
+					imginfo += chunk;
+				});
+				imgres.on('end', function() {
+					JSONinfo.picture = JSON.parse(imginfo).data.url;
+					couchrequest.put(JSONinfo.id, JSONinfo, function(couchRes) {
+						response.writeHead(200, {"Content-Type": "application/json"});
+						response.write(couchRes);
+						response.end();
+					});
+				});
+			})
+		});
+
+	}).on('error', function(e) {
+		utils.write_log('Problem with request: ' + e);
+	});
 }
 
 // Logs in a user and sends all his information
 function login(response, postData) {
 	utils.write_log('Request handler for "login" has been called');
 
-	response.writeHead(200, {"Content-Type": "text/html"});
-	response.write("login");
-	response.end();
+	var id = querystring.parse(postData)['id'];
+	if (id == null || id == "") {
+		response.write(constants.ERROR_MATES_ID_MISSING);
+		response.end();
+		return;
+	}
+	couchrequest.exists(id, 
+		function(err) {
+			response.writeHead(404, {"Content-Type": "text/html"});
+			response.write(err + "\n");
+			response.end();
+		},
+		function(JSONres) {
+			response.writeHead(200, {"Content-Type": "application/json"});
+			response.write(JSON.stringify(JSONres));
+			response.end();
+	});
 }
 
 // Locates people near from the requester, based on his gps location

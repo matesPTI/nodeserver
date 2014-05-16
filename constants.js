@@ -14,6 +14,8 @@ var constants = {
 
 	'ERROR_GCM_ID_MISSING' : 'Error: gmcid field missing.\n',
 
+	'ERROR_FB_TOKEN_MISSING' : 'Error: facebook access token missing.\n',
+
 	'ERROR_UNREGISTERED_USER' : 'Error: this user is not registered.\n'
 };
 

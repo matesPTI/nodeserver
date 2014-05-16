@@ -50,5 +50,18 @@ function put(path, JSONdata, callback) {
 	couchReq.end();
 }
 
+function exists(id, onFalse, onTrue) {
+	get(id, function(couchRes) {
+		JSONinfo = JSON.parse(couchRes);
+		if (JSONinfo.error == null || JSONinfo.error == "") {
+			onTrue(JSONinfo);
+		}
+		else {
+			onFalse(JSONinfo.error);
+		}
+	});
+}
+
 exports.get = get;
 exports.put = put;
+exports.exists = exists;
