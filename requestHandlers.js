@@ -53,22 +53,30 @@ function signup(response, postData) {
 		res.on('end', function() {
 			var JSONinfo = JSON.parse(info);
 
-			options.path = '/me/picture?redirect=0&width=300&height=300&access_token=' + token;
-			https.get(options, function(imgres) {
-				imgres.setEncoding('utf8');
-				var imginfo = '';
-				imgres.on('data', function(chunk) {
-					imginfo += chunk;
-				});
-				imgres.on('end', function() {
-					JSONinfo.picture = JSON.parse(imginfo).data.url;
-					couchrequest.put(JSONinfo.id, JSONinfo, function(couchRes) {
-						response.writeHead(200, {"Content-Type": "application/json"});
-						response.write(couchRes);
-						response.end();
-					});
-				});
-			})
+			couchrequest.exists(JSONinfo.id,
+				function(err) {
+					options.path = '/me/picture?redirect=0&width=300&height=300&access_token=' + token;
+					https.get(options, function(imgres) {
+						imgres.setEncoding('utf8');
+						var imginfo = '';
+						imgres.on('data', function(chunk) {
+							imginfo += chunk;
+						});
+						imgres.on('end', function() {
+							JSONinfo.picture = JSON.parse(imginfo).data.url;
+							couchrequest.put(JSONinfo.id, JSONinfo, function(couchRes) {
+								response.writeHead(200, {"Content-Type": "application/json"});
+								response.write(couchRes);
+								response.end();
+							});
+						});
+					})
+				},
+				function(couchRes) {
+					response.writeHead(200, {"Content-Type": "application/json"});
+					response.write(JSON.stringify(couchRes));
+					response.end();
+			});
 		});
 
 	}).on('error', function(e) {
@@ -150,7 +158,7 @@ function register(response, postData) {
 function send(response, postData) {
 	utils.write_log('Request handler for "send" has been called');
 
-	var sender = new gcm.Sender('AIzaSyCRYkW6OoS8NrURzI-MsU3SkrsfDhPrmRs');
+	var sender = new gcm.Sender(constants.GCM_SERVER_KEY);
 	var senderid = querystring.parse(postData)['sender'];
 	var receiverid = querystring.parse(postData)['receiver'];
 	var data = querystring.parse(postData)['data'];
