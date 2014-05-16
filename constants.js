@@ -5,4 +5,4 @@ var Constants = {
 	'GCM_SERVER_KEY' : 'AIzaSyCRYkW6OoS8NrURzI-MsU3SkrsfDhPrmRs'
 };
 
-module.exports = Constants;
+exports.Constants = Constants;

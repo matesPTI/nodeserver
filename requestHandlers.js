@@ -4,7 +4,6 @@ var https = require('https');
 var futures = require('futures');
 var gcm = require('node-gcm');
 var fs = require('fs');
-var Constants = require('./constants');
 
 function init(response, postData) {
 	write_log('Request handler for "init" has been called.');
@@ -83,7 +82,7 @@ function locate(response, postData) {
 function send(response, postData) {
 	write_log('Request handler for "send" has been called');
 
-	var sender = new gcm.Sender(Constants.GCM_SERVER_KEY);
+	var sender = new gcm.Sender('AIzaSyCRYkW6OoS8NrURzI-MsU3SkrsfDhPrmRs');
 	var id = querystring.parse(postData)['id'];
 	var data = querystring.parse(postData)['data'];
 
