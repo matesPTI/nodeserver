@@ -89,7 +89,7 @@ function signup(response, postData) {
 }
 
 // Logs in a user and sends all his information
-function login(response, postData) {
+function user(response, postData) {
 	utils.write_log('Request handler for "login" has been called');
 
 	var id = querystring.parse(postData)['id'];
@@ -110,6 +110,7 @@ function login(response, postData) {
 			response.end();
 	});
 }
+
 
 // Locates people near from the requester, based on his gps location
 function locate(response, postData) {
@@ -297,7 +298,7 @@ function send(response, postData) {
 
 exports.init = init;
 exports.signup = signup;
-exports.login = login;
+exports.user = user;
 exports.register = register;
 exports.locate = locate;
 exports.mate = mate;
