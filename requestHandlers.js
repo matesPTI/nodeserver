@@ -146,8 +146,8 @@ function locate(response, postData) {
 			response.end();
 		},
 		function(JSONinfo) {
-			JSONinfo.lat = lat;
-			JSONinfo.lon = lon;
+			JSONinfo.location.lat = lat;
+			JSONinfo.location.lon = lon;
 			var elasticQuery = couchrequest.elasticQuery(lat, lon, JSONinfo.distance, JSONinfo.yes.concat(JSONinfo.no));
 
 			couchrequest.elasticGet(elasticQuery, function(elasticRes) {
@@ -234,56 +234,58 @@ function mate(response, postData) {
 		}, 
 		function(JSONme) {
 			if (mate == 0) JSONme.no.push(receiverid);
-			else JSONme.yes.push(receiverid);
+			else {
+				JSONme.yes.push(receiverid);
 
-			couchrequest.exists(receiverid,
-				function(rerr) {
-					response.writeHead(400, {"Content-Type": "text/html"});
-					response.write(constants.ERROR_USER_NOT_FOUND);
-					response.end();
-				},
-				function(JSONother) {
-					var wishlist = JSONother.yes;
-					if (wishlist.indexOf(senderid) >= 0) {
-						JSONme.mates.push(receiverid);
-						JSONother.mates.push(senderid);
-						couchrequest.put(receiverid, JSONother, function(a){}); 
+				couchrequest.exists(receiverid,
+					function(rerr) {
+						response.writeHead(400, {"Content-Type": "text/html"});
+						response.write(constants.ERROR_USER_NOT_FOUND);
+						response.end();
+					},
+					function(JSONother) {
+						var wishlist = JSONother.yes;
+						if (wishlist.indexOf(senderid) >= 0) {
+							JSONme.mates.push(receiverid);
+							JSONother.mates.push(senderid);
+							couchrequest.put(receiverid, JSONother, function(a){}); 
 
-						var sender = new gcm.Sender(constants.GCM_SERVER_KEY);
-						var message = new gcm.Message({
-						    delayWhileIdle: true,
-						    data: {
-						    	type: "mate",
-						        data: JSON.stringify(JSONme)
-						    }
-						});
-
-						var ids = [];
-						var gcmid1 = JSONme.gcmid;
-						var gcmid2 = JSONother.gcmid;
-						if (gcmid1 == null || gcmid1 == "") {
-							response.write(constants.ERROR_UNREGISTERED_USER);
-							response.end();
-						}
-						if (gcmid2 == null || gcmid2 == "") {
-							response.write(constants.ERROR_UNREGISTERED_USER);
-							response.end();
-						}
-						else {
-							ids.push(gcmid1);
-							ids.push(gcmid2);
-							sender.send(message, ids, 4, function (err, result) {
-							    utils.write_log('GCM error: ' + err);
-							    utils.write_log('GCM result: ' + result);
+							var sender = new gcm.Sender(constants.GCM_SERVER_KEY);
+							var message = new gcm.Message({
+							    delayWhileIdle: false,
+							    data: {
+							    	type: "mate",
+							        data: JSON.stringify(JSONme)
+							    }
 							});
-						}
-					}
-					couchrequest.put(senderid, JSONme, function(a){});
 
-					response.writeHead(200, {"Content-Type": "text/html"});
-					response.write("OK");
-					response.end();
+							var ids = [];
+							var gcmid1 = JSONme.gcmid;
+							var gcmid2 = JSONother.gcmid;
+							if (gcmid1 == null || gcmid1 == "") {
+								response.write(constants.ERROR_UNREGISTERED_USER);
+								response.end();
+							}
+							if (gcmid2 == null || gcmid2 == "") {
+								response.write(constants.ERROR_UNREGISTERED_USER);
+								response.end();
+							}
+							else {
+								ids.push(gcmid1);
+								ids.push(gcmid2);
+								sender.send(message, ids, 4, function (err, result) {
+								    utils.write_log('GCM error: ' + err);
+								    utils.write_log('GCM result: ' + result);
+								});
+							}
+						}
 				});
+				couchrequest.put(senderid, JSONme, function(a){});
+
+				response.writeHead(200, {"Content-Type": "text/html"});
+				response.write("OK");
+				response.end();
+			}
 	});
 }
 
@@ -308,10 +310,12 @@ function send(response, postData) {
 		return;
 	}
 	var message = new gcm.Message({
-	    delayWhileIdle: true,
+	    delayWhileIdle: false,
 	    data: {
 	    	type: "message",
-	        data: data
+	        data: data,
+	        sender: senderid,
+	        receiver: receiverid
 	    }
 	});
 
@@ -338,6 +342,31 @@ function send(response, postData) {
 	});
 }
 
+// Sends new info from the user
+function upload(response, postData) {
+	utils.write_log('Request handler for "upload" has been called');
+
+	var id = querystring.parse(postData)['id'];
+	var img = querystring.parse(postData)['img'];
+
+	if (id == null || id == "") {
+		response.writeHead(404, {"Content-Type": "text/html"});
+		response.write(constants.ERROR_MATES_ID_MISSING);
+		response.end();
+		return;
+	}
+	if (img == null || img == "") {
+		response.writeHead(404, {"Content-Type": "text/html"});
+		response.write(constants.ERROR_IMAGE_MISSING);
+		response.end();
+		return;
+	}
+
+	response.writeHead(200, {"Content-Type": "text/html"});
+	response.write("OK");
+	response.end();
+}
+
 exports.init = init;
 exports.signup = signup;
 exports.user = user;
@@ -345,3 +374,4 @@ exports.register = register;
 exports.locate = locate;
 exports.mate = mate;
 exports.send = send;
+exports.upload = upload;
