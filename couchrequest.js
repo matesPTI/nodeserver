@@ -66,13 +66,14 @@ function exists(id, onFalse, onTrue) {
  * lat, lon format: 0.0
  * dist format: "20km"
  */
-function elasticQuery(lat, lon, dist, values) {
+function elasticQuery(lat, lon, dist, gender, interest, values) {
 	var JSONobject = {
 		"from" : 0, "size" : 1,
 		"query": {
 			"filtered" : {
 		    	"query" : {
 		        	"bool" : {
+		        		"must" : {},
 		        		"must_not" : [
 		        			{
 		        				"ids" : {
@@ -94,6 +95,22 @@ function elasticQuery(lat, lon, dist, values) {
 			}
 		}
 	};
+	if (interest == "both") {
+		console.log("BOTHHHH\n");
+		JSONobject.query.filtered.query.bool.must = {
+			"term" : { 
+		    	"interested_in" : gender
+		    }
+		}
+	}
+	else {
+		JSONobject.query.filtered.query.bool.must = {
+			"terms" : { 
+				"gender" : interest ,
+		        "interested_in" : gender
+		    }
+		}
+	}
 	return JSONobject;
 }
 
