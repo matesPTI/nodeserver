@@ -162,8 +162,10 @@ function locate(response, postData) {
 		function(JSONinfo) {
 			JSONinfo.location.lat = lat;
 			JSONinfo.location.lon = lon;
-			var elasticQuery = couchrequest.elasticQuery(lat, lon, JSONinfo.distance, JSONinfo.yes.concat(JSONinfo.no));
-
+			var list = JSONinfo.yes.concat(JSONinfo.no);
+			list.push(JSONinfo.id);
+			var elasticQuery = couchrequest.elasticQuery(lat, lon, JSONinfo.distance, list);
+			
 			couchrequest.elasticGet(elasticQuery, function(elasticRes) {
 				var JSONres = JSON.parse(elasticRes);
 				if (JSONres.error != null && JSONres.error != "") {
