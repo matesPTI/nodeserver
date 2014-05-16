@@ -159,7 +159,9 @@ function locate(response, postData) {
 				}
 				else {
 					response.writeHead(200, {"Content-Type": "application/json"});
-					response.write(JSON.stringify(JSONres.hits.hits));
+					var JSONresult = {};
+					JSONresult.users = JSONres.hits.hits;
+					response.write(JSON.stringify(JSONresult));
 					response.end();
 				}
 			});
