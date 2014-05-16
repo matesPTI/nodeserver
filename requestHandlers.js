@@ -64,6 +64,7 @@ function signup(response, postData) {
 						});
 						imgres.on('end', function() {
 							JSONinfo.picture = JSON.parse(imginfo).data.url;
+							JSONinfo.distance = "20km";
 							couchrequest.put(JSONinfo.id, JSONinfo, function(couchRes) {
 								response.writeHead(200, {"Content-Type": "application/json"});
 								response.write(couchRes);
@@ -112,17 +113,37 @@ function locate(response, postData) {
 	utils.write_log('Request handler for "locate" has been called');
 
 	var id = querystring.parse(postData)['id'];
+	var lat = querystring.parse(postData)['lat'];
+	var lon = querystring.parse(postData)['lon'];
+
+	response.writeHead(200, {"Content-Type": "text/html"});
 	if (id == null || id == "") {
 		response.write(constants.ERROR_MATES_ID_MISSING);
 		response.end();
+		return;
 	}
-	else {
-		couchrequest.get(id, function(couchRes) {
+	if (lat == null || lat == "") {
+		response.write(constants.ERROR_GPS_POSITION_MISSING);
+		response.end();
+		return;
+	}
+	if (lon == null || lon == "") {
+		response.write(constants.ERROR_GPS_POSITION_MISSING);
+		response.end();
+		return;
+	}
+
+	couchrequest.get(id, function(couchRes) {
+		var JSONinfo = JSON.parse(couchRes);
+		var elasticQuery = couchrequest.elasticQuery(lat, lon, JSONinfo.distance);
+
+		couchrequest.elasticGet(elasticQuery, function(elasticRes) {
+			var JSONres = JSON.parse(elasticRes);
 			response.writeHead(200, {"Content-Type": "application/json"});
-			response.write(info);
+			response.write(JSON.stringify(JSONres.hits.hits));
 			response.end();
 		});
-	}
+	});
 }
 
 function register(response, postData) {

@@ -62,6 +62,59 @@ function exists(id, onFalse, onTrue) {
 	});
 }
 
+/**
+ * lat, lon format: 0.0
+ * dist format: "20km"
+ */
+function elasticQuery(lat, lon, dist) {
+	var JSONobject = {
+		"query": {
+			"filtered" : {
+		    	"query" : {
+		        	"match_all" : {}
+		    	},
+		    	"filter" : {
+		        	"geo_distance" : {
+		            	"distance" : dist,
+		            	"location" : {
+		                	"lat" : lat,
+		                	"lon" : lon
+		            	}
+		        	}
+		    	}
+			}
+		}
+	};
+	return JSONobject;
+}
+
+function elasticGet(query, callback) {
+	var options = {
+		host: constants.ELASTIC_SERVER_IP,
+		port: constants.ELASTIC_SERVER_PORT,
+		path: constants.ELASTIC_SERVER_PATH,
+		method: 'POST'
+	};
+	var elasticReq = http.request(options, function(res) {
+		res.setEncoding('utf8');
+		var elasticRes = '';
+		res.on('data', function(chunk) {
+			elasticRes += chunk;
+		});
+		res.on('end', function() {
+			callback(elasticRes);
+		});
+
+	}).on('error', function(e) {
+		utils.write_log('Problem with request: ' + e);
+	});
+
+	elasticReq.write(JSON.stringify(query));
+	elasticReq.end();
+}
+
 exports.get = get;
 exports.put = put;
 exports.exists = exists;
+exports.elasticQuery = elasticQuery;
+exports.elasticGet = elasticGet;

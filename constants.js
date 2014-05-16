@@ -6,7 +6,13 @@ var constants = {
 
 	'COUCH_SERVER_PORT' : 5984,
 
-	'COUCH_USERS_PATH' : '/dades/',
+	'COUCH_USERS_PATH' : '/mates/',
+
+	'ELASTIC_SERVER_IP' : '54.76.3.85',
+
+	'ELASTIC_SERVER_PORT' : 9200,
+
+	'ELASTIC_SERVER_PATH' : '/mates/mates/_search',
 
 	'GCM_SERVER_KEY' : 'AIzaSyCRYkW6OoS8NrURzI-MsU3SkrsfDhPrmRs',
 
@@ -16,7 +22,9 @@ var constants = {
 
 	'ERROR_FB_TOKEN_MISSING' : 'Error: facebook access token missing.\n',
 
-	'ERROR_UNREGISTERED_USER' : 'Error: this user is not registered.\n'
+	'ERROR_UNREGISTERED_USER' : 'Error: this user is not registered.\n',
+
+	'ERROR_GPS_POSITION_MISSING' : 'Error: gps position missing.\n'
 };
 
 module.exports = constants;
