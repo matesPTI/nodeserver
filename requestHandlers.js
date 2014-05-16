@@ -68,6 +68,10 @@ function signup(response, postData) {
 							JSONinfo.yes = [];
 							JSONinfo.no = [];
 							JSONinfo.mates = [];
+							JSONinfo.location = {
+								lat : null,
+								lon: null
+							};
 							couchrequest.put(JSONinfo.id, JSONinfo, function(couchRes) {
 								response.writeHead(200, {"Content-Type": "application/json"});
 								response.write(couchRes);
