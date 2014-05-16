@@ -43,7 +43,7 @@ function signup(response, postData) {
 	var options = {
 		host: 'graph.facebook.com',
 		port: 443,
-		path: '/me?fields=id,name,birthday&access_token='+ token
+		path: '/me?fields=id,name,birthday,gender&access_token='+ token
 	};
 	https.get(options, function(res) {
 		res.setEncoding('utf8');
@@ -73,6 +73,8 @@ function signup(response, postData) {
 								lat : null,
 								lon: null
 							};
+							JSONinfo.interested_in = "both";
+
 							couchrequest.put(JSONinfo.id, JSONinfo, function(couchRes) {
 								response.writeHead(200, {"Content-Type": "application/json"});
 								response.write(couchRes);
@@ -164,7 +166,7 @@ function locate(response, postData) {
 			JSONinfo.location.lon = lon;
 			var list = JSONinfo.yes.concat(JSONinfo.no);
 			list.push(JSONinfo.id);
-			var elasticQuery = couchrequest.elasticQuery(lat, lon, JSONinfo.distance, list);
+			var elasticQuery = couchrequest.elasticQuery(lat, lon, JSONinfo.distance, JSONinfo.gender, JSONinfo.interested_in, list);
 			
 			couchrequest.elasticGet(elasticQuery, function(elasticRes) {
 				var JSONres = JSON.parse(elasticRes);
