@@ -11,6 +11,6 @@ handle['/locate'] = requestHandlers.locate;
 handle['/mate'] = requestHandlers.mate;
 handle['/register'] = requestHandlers.register;
 handle['/send'] = requestHandlers.send;
-handle['upload'] = requestHandlers.upload;
+handle['/upload'] = requestHandlers.upload;
 
 server.start(router.route, handle);

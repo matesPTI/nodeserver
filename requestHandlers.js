@@ -164,7 +164,13 @@ function locate(response, postData) {
 				else {
 					response.writeHead(200, {"Content-Type": "application/json"});
 					var JSONresult = {};
-					JSONresult.users = JSONres.hits.hits;
+					if (JSONres.hits.hits.length == 0) {
+						JSONresult.found = false;
+					}
+					else {
+						JSONresult = JSONres.hits.hits[0]._source;
+						JSONresult.found = true;
+					}
 					response.write(JSON.stringify(JSONresult));
 					response.end();
 				}

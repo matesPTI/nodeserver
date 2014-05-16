@@ -68,7 +68,7 @@ function exists(id, onFalse, onTrue) {
  */
 function elasticQuery(lat, lon, dist, values) {
 	var JSONobject = {
-		"from" : 0, "size" : 10,
+		"from" : 0, "size" : 1,
 		"query": {
 			"filtered" : {
 		    	"query" : {

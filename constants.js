@@ -30,7 +30,9 @@ var constants = {
 
 	'ERROR_ELASTIC_FAILURE' : 'Error: the search failed.\n',
 
-	'ERROR_MATE_VALUE_MISSING' : 'Error: mate value missing.\n'
+	'ERROR_MATE_VALUE_MISSING' : 'Error: mate value missing.\n',
+
+	'ERROR_IMAGE_MISSING' : 'Error: image missing.\n'
 };
 
 module.exports = constants;
