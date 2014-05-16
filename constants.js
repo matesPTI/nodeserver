@@ -24,7 +24,13 @@ var constants = {
 
 	'ERROR_UNREGISTERED_USER' : 'Error: this user is not registered.\n',
 
-	'ERROR_GPS_POSITION_MISSING' : 'Error: gps position missing.\n'
+	'ERROR_USER_NOT_FOUND' : 'Error: this user has not been found.\n',
+
+	'ERROR_GPS_POSITION_MISSING' : 'Error: gps position missing.\n',
+
+	'ERROR_ELASTIC_FAILURE' : 'Error: the search failed.\n',
+
+	'ERROR_MATE_VALUE_MISSING' : 'Error: mate value missing.\n'
 };
 
 module.exports = constants;

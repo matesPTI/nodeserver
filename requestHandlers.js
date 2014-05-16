@@ -65,6 +65,9 @@ function signup(response, postData) {
 						imgres.on('end', function() {
 							JSONinfo.picture = JSON.parse(imginfo).data.url;
 							JSONinfo.distance = "20km";
+							JSONinfo.yes = [];
+							JSONinfo.no = [];
+							JSONinfo.mates = [];
 							couchrequest.put(JSONinfo.id, JSONinfo, function(couchRes) {
 								response.writeHead(200, {"Content-Type": "application/json"});
 								response.write(couchRes);
@@ -139,9 +142,16 @@ function locate(response, postData) {
 
 		couchrequest.elasticGet(elasticQuery, function(elasticRes) {
 			var JSONres = JSON.parse(elasticRes);
-			response.writeHead(200, {"Content-Type": "application/json"});
-			response.write(JSON.stringify(JSONres.hits.hits));
-			response.end();
+			if (JSONres.error != null && JSONres.error != "") {
+				response.writeHead(400, {"Content-Type": "text/html"});
+				response.write(constants.ERROR_ELASTIC_FAILURE);
+				response.end();
+			}
+			else {
+				response.writeHead(200, {"Content-Type": "application/json"});
+				response.write(JSON.stringify(JSONres.hits.hits));
+				response.end();
+			}
 		});
 	});
 }
@@ -175,6 +185,65 @@ function register(response, postData) {
 	}
 }
 
+// Decide whether to mate someone or not
+function mate(response, postData) {
+	utils.write_log('Request handler for "mate" has been called');
+
+	var senderid = querystring.parse(postData)['sender'];
+	var receiverid = querystring.parse(postData)['receiver'];
+	var mate = querystring.parse(postData)['mate'];
+
+	if (senderid == null || senderid == "") {
+		response.writeHead(400, {"Content-Type": "text/html"});
+		response.write(constants.ERROR_MATES_ID_MISSING);
+		response.end();
+		return;
+	}
+	if (receiverid == null || receiverid == "") {
+		response.writeHead(400, {"Content-Type": "text/html"});
+		response.write(constants.ERROR_MATES_ID_MISSING);
+		response.end();
+		return;
+	}
+	if (mate == null || mate == "") {
+		response.writeHead(400, {"Content-Type": "text/html"});
+		response.write(constants.ERROR_MATE_VALUE_MISSING);
+		response.end();
+		return;
+	}
+
+	couchrequest.exists(senderid, 
+		function(serr) {
+			response.writeHead(400, {"Content-Type": "text/html"});
+			response.write(constants.ERROR_USER_NOT_FOUND);
+			response.end();
+		}, 
+		function(JSONme) {
+			if (mate == 0) JSONme.no.push(receiverid);
+			else JSONme.yes.push(receiverid);
+
+			couchrequest.exists(receiverid,
+				function(rerr) {
+					response.writeHead(400, {"Content-Type": "text/html"});
+					response.write(constants.ERROR_USER_NOT_FOUND);
+					response.end();
+				},
+				function(JSONother) {
+					var wishlist = JSONother.yes;
+					if (wishlist.indexOf(senderid) >= 0) {
+						JSONme.mates.push(receiverid);
+						JSONother.mates.push(senderid);
+						couchrequest.put(receiverid, JSONother, function(a){}); 
+					}
+					couchrequest.put(senderid, JSONme, function(a){});
+
+					response.writeHead(200, {"Content-Type": "text/html"});
+					response.write("OK");
+					response.end();
+				});
+	});
+}
+
 // Sends a message to a user
 function send(response, postData) {
 	utils.write_log('Request handler for "send" has been called');
@@ -188,43 +257,42 @@ function send(response, postData) {
 	if (senderid == null || senderid == "") {
 		response.write(constants.ERROR_MATES_ID_MISSING);
 		response.end();
+		return;
 	}
 	if (receiverid == null || receiverid == "") {
 		response.write(constants.ERROR_MATES_ID_MISSING);
 		response.end();
+		return;
 	}
-	else {
+	var message = new gcm.Message({
+	    delayWhileIdle: true,
+	    data: {
+	    	type: "message",
+	        data: data
+	    }
+	});
 
-		var message = new gcm.Message({
-		    /*collapseKey: 'demo',*/
-		    delayWhileIdle: true,
-		    data: {
-		        data: data
-		    }
-		});
-
-		var ids = [];
-		couchrequest.get(receiverid, function(couchRes) {
-			var gcmid = JSON.parse(couchRes).gcmid;
-			if (gcmid == null || gcmid == "") {
-				response.write(constants.ERROR_UNREGISTERED_USER);
-				response.end();
-			}
-			else {
-				response.write("OK");
-				response.end();
-				ids.push(gcmid);
-
-				/**
-				 * Params: message-literal, registrationIds-array, No. of retries, callback-function
-				 **/
-				sender.send(message, ids, 4, function (err, result) {
-				    utils.write_log('GCM error: ' + err);
-				    utils.write_log('GCM result: ' + result);
-				});
-			}
-		});
+	var ids = [];
+	couchrequest.get(receiverid, function(couchRes) {
+		var gcmid = JSON.parse(couchRes).gcmid;
+		if (gcmid == null || gcmid == "") {
+			response.write(constants.ERROR_UNREGISTERED_USER);
+			response.end();
 		}
+		else {
+			response.write("OK");
+			response.end();
+			ids.push(gcmid);
+
+			/**
+			 * Params: message-literal, registrationIds-array, No. of retries, callback-function
+			 **/
+			sender.send(message, ids, 4, function (err, result) {
+			    utils.write_log('GCM error: ' + err);
+			    utils.write_log('GCM result: ' + result);
+			});
+		}
+	});
 }
 
 exports.init = init;
@@ -232,4 +300,5 @@ exports.signup = signup;
 exports.login = login;
 exports.register = register;
 exports.locate = locate;
+exports.mate = mate;
 exports.send = send;
