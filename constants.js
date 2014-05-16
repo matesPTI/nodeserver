@@ -32,7 +32,9 @@ var constants = {
 
 	'ERROR_MATE_VALUE_MISSING' : 'Error: mate value missing.\n',
 
-	'ERROR_IMAGE_MISSING' : 'Error: image missing.\n'
+	'ERROR_IMAGE_MISSING' : 'Error: image missing.\n',
+
+	'ERROR_INVALID_JSON' : 'Error: invalid JSON.\n'
 };
 
 module.exports = constants;

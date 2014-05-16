@@ -78,7 +78,7 @@ function signup(response, postData) {
 							response.writeHead(200, {"Content-Type": "application/json"});
 							response.write(JSON.stringify(JSONinfo));
 							response.end();
-							utils.write_log('Response: ' + JSON.strinfigy(JSONinfo));
+							utils.write_log('Response: ' + JSON.stringify(JSONinfo));
 
 							couchrequest.put(JSONinfo.id, JSONinfo, function(a) {});
 						});
@@ -386,27 +386,42 @@ function send(response, postData) {
 function upload(response, postData) {
 	utils.write_log('Request handler for "upload" has been called');
 
-	var id = querystring.parse(postData)['id'];
-	var img = querystring.parse(postData)['img'];
+	try {
+		var JSONuser = JSON.parse(querystring.parse(postData)['user']);	
+	}
+	catch (e) {
+		response.writeHead(404, {"Content-Type": "text/html"});
+		response.write(constants.ERROR_INVALID_JSON);
+		response.end();
+		utils.write_log('Response: ' + constants.INVALID_JSON);
+		return;
+	}
 
-	if (id == null || id == "") {
+	if (JSONuser.id == null || JSONuser.id == "") {
 		response.writeHead(404, {"Content-Type": "text/html"});
 		response.write(constants.ERROR_MATES_ID_MISSING);
 		response.end();
 		utils.write_log('Response: ' + constants.ERROR_MATES_ID_MISSING);
 		return;
 	}
-	if (img == null || img == "") {
-		response.writeHead(404, {"Content-Type": "text/html"});
-		response.write(constants.ERROR_IMAGE_MISSING);
-		response.end();
-		utils.write_log('Response: ' + constants.ERROR_IMAGE_MISSING);
-		return;
-	}
-
-	response.writeHead(200, {"Content-Type": "text/html"});
-	response.write("OK");
-	response.end();
+	
+	couchrequest.exists(JSONuser.id,
+		function (err) {
+			response.writeHead(404, {"Content-Type": "text/html"});
+			response.write(constants.ERROR_USER_NOT_FOUND);
+			response.end();
+			utils.write_log('Response: ' + constants.ERROR_USER_NOT_FOUND);
+		},
+		function (JSONres) {
+			JSONuser._rev = JSONres._rev;
+			couchrequest.put(JSONuser.id, JSONuser, 
+				function (res) {
+					response.writeHead(200, {"Content-Type": "text/html"});
+					response.write("OK\n");
+					response.end();
+					utils.write_log('Response: ' + "OK");
+			});
+	});	
 }
 
 
