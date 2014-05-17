@@ -1,7 +1,7 @@
 var https = require('https');
 var url = require('url');
 var fs = require('fs');
-var Constants = require('./Constants');
+var Constants = require('./constants');
 
 function start(route, handle) {
 

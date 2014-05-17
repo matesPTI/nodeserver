@@ -4,7 +4,7 @@ var https = require('https');
 var futures = require('futures');
 var gcm = require('node-gcm');
 var fs = require('fs');
-var Constants = require('./Constants');
+var Constants = require('./constants');
 
 function init(response, postData) {
 	write_log('Request handler for "init" has been called.');
