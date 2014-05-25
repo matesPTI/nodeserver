@@ -2,7 +2,6 @@ var exec = require("child_process").exec;
 var querystring = require('querystring');
 var http = require('http');
 var https = require('https');
-var futures = require('futures');
 var gcm = require('node-gcm');
 var couchrequest = require('./couchrequest');
 var utils = require('./utils');
@@ -284,17 +283,25 @@ function mate(response, postData) {
 							couchrequest.put(receiverid, JSONother, function(a){}); 
 
 							var sender = new gcm.Sender(constants.GCM_SERVER_KEY);
-							var message = new gcm.Message({
+							var message1 = new gcm.Message({
 							    delayWhileIdle: false,
 							    data: {
 							    	type: "mate",
 							        data: JSON.stringify(JSONme)
 							    }
 							});
+							var message2 = new gcm.Message({
+								delayWhileIdle: false,
+								data: {
+									type: "mate",
+									data: JSON.stringify(JSONother)
+								}
+							});
 
-							var ids = [];
-							var gcmid1 = JSONme.gcmid;
-							var gcmid2 = JSONother.gcmid;
+							var ids1 = [];
+							var ids2 = [];
+							var gcmid1 = JSONother.gcmid;
+							var gcmid2 = JSONme.gcmid;
 							if (gcmid1 == null || gcmid1 == "") {
 								response.write(constants.ERROR_UNREGISTERED_USER);
 								response.end();
@@ -306,9 +313,13 @@ function mate(response, postData) {
 								utils.write_log('Response: ' + constants.ERROR_UNREGISTERED_USER);
 							}
 							else {
-								ids.push(gcmid1);
-								ids.push(gcmid2);
-								sender.send(message, ids, 4, function (err, result) {
+								ids1.push(gcmid1);
+								ids2.push(gcmid2);
+								sender.send(message1, ids1, 4, function (err, result) {
+								    utils.write_log('GCM error: ' + err);
+								    utils.write_log('GCM result: ' + result);
+								});
+								sender.send(message2, ids2, 4, function (err, result) {
 								    utils.write_log('GCM error: ' + err);
 								    utils.write_log('GCM result: ' + result);
 								});
@@ -451,6 +462,10 @@ function erase(response, postData) {
 			response.end();
 			utils.write_log('Response: ' + JSON.stringify(JSONinfo));
 	});
+}
+
+function create(response, postData) {
+
 }
 
 exports.init = init;
